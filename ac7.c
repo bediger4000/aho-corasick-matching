@@ -1,21 +1,10 @@
-#include <sfio.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <libc.h>
+#include <string.h>
 #include <assert.h>
 
 #include <ac7.h>
 #include <cb.h>
-
-#undef DEBUG
-#ifdef DEBUG
-#define D(c) c
-#else
-#define D(c) 
-#endif
-
-#ifdef LEAK
-#include <leak.h>
-#endif
 
 struct gto *
 init_goto()
@@ -63,13 +52,13 @@ construct_goto(char *keywords[], int k, struct gto *g)
 		while (
 			FAIL != (
 				(state<g->ary_len) ?
-					g->ary[state][keywords[i][j]] :
+					g->ary[state][(int)keywords[i][j]] :
 					(assert(state>=g->ary_len),FAIL)
 				)
 			)
 		{
 			state = ((state<g->ary_len) ?
-						g->ary[state][keywords[i][j]] :
+						g->ary[state][(int)keywords[i][j]] :
 						(assert(state>=g->ary_len),FAIL)
 					);
 			++j;
@@ -167,7 +156,7 @@ add_state(struct gto *p, int state, char input, int new_state)
 	}
 
 	assert(state < p->ary_len);
-	p->ary[state][input] = new_state;
+	p->ary[state][(int)input] = new_state;
 }
 
 void
@@ -245,7 +234,7 @@ perform_match(struct gto *g, char *in)
 	assert(NULL != in);
 
 	while(*in != '\0')
-		state = g->delta[state][*in++];
+		state = g->delta[state][(int)*in++];
 
 	if (g->accept[state].next && ('\0' == *in))
 	{

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cb.h>
+#include <assert.h>
 
 #ifdef LEAK
 #include <leak.h>
@@ -11,9 +12,11 @@ queueinit()
 {
 	struct queue *r;
 
-	r = malloc(sizeof(*r));
+	r = (struct queue *)malloc(sizeof(*r));
+	assert(NULL != r);
 
-	r->cbuf = malloc(CBUFSIZE*sizeof(int));
+	r->cbuf = (int *)malloc(CBUFSIZE*sizeof(int));
+	assert(NULL != r->cbuf);
 
 	r->in = 0;
 	r->out = 0;
@@ -34,15 +37,18 @@ enqueue(struct queue *q, int state)
 {
 	struct queue_node *newnode;
 
+	assert(NULL != q);
 
 	if (((q->in + 1)&CBUFMASK) != q->out)
 	{
+		assert(NULL != q->cbuf);
 		q->cbuf[q->in] = state;
 		q->in = (q->in+1)&CBUFMASK;
 
 	} else {
 
-		newnode = malloc(sizeof *newnode);
+		newnode = (struct queue_node *)malloc(sizeof *newnode);
+		assert(NULL != newnode);
 		newnode->state = state;
 		newnode->next = NULL;
 
@@ -59,6 +65,7 @@ enqueue(struct queue *q, int state)
 int
 queueempty(struct queue *q)
 {
+	assert(NULL != q);
 	return (q->in == q->out);
 }
 
@@ -67,8 +74,10 @@ dequeue(struct queue *q)
 {
 	int r;
 
+	assert(NULL != q);
 	if (q->in == q->out) empty_error(q);
 
+	assert(NULL != q->cbuf);
 	r = q->cbuf[q->out];
 
 	q->out = (q->out + 1)&CBUFMASK;
@@ -91,6 +100,8 @@ dequeue(struct queue *q)
 void
 queuedestroy(struct queue *q)
 {
+	assert(NULL != q);
+
 	if (NULL != q->cbuf) free(q->cbuf);
 
 	while (NULL != q->ovfhead)

@@ -1,7 +1,6 @@
-#include <sfio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <cb.h>
-#include <assert.h>
 
 #ifdef LEAK
 #include <leak.h>
@@ -12,11 +11,9 @@ queueinit()
 {
 	struct queue *r;
 
-	r = (struct queue *)malloc(sizeof(*r));
-	assert(NULL != r);
+	r = malloc(sizeof(*r));
 
-	r->cbuf = (int *)malloc(CBUFSIZE*sizeof(int));
-	assert(NULL != r->cbuf);
+	r->cbuf = malloc(CBUFSIZE*sizeof(int));
 
 	r->in = 0;
 	r->out = 0;
@@ -28,7 +25,7 @@ queueinit()
 void
 empty_error(struct queue *q)
 {
-	sfprintf(sfstderr, "Tried to get off empty queue: in %d, out %d\n", q->in, q->out);
+	fprintf(stderr, "Tried to get off empty queue: in %d, out %d\n", q->in, q->out);
 	exit(9);
 }
 
@@ -37,18 +34,15 @@ enqueue(struct queue *q, int state)
 {
 	struct queue_node *newnode;
 
-	assert(NULL != q);
 
 	if (((q->in + 1)&CBUFMASK) != q->out)
 	{
-		assert(NULL != q->cbuf);
 		q->cbuf[q->in] = state;
 		q->in = (q->in+1)&CBUFMASK;
 
 	} else {
 
-		newnode = (struct queue_node *)malloc(sizeof *newnode);
-		assert(NULL != newnode);
+		newnode = malloc(sizeof *newnode);
 		newnode->state = state;
 		newnode->next = NULL;
 
@@ -65,7 +59,6 @@ enqueue(struct queue *q, int state)
 int
 queueempty(struct queue *q)
 {
-	assert(NULL != q);
 	return (q->in == q->out);
 }
 
@@ -74,10 +67,8 @@ dequeue(struct queue *q)
 {
 	int r;
 
-	assert(NULL != q);
 	if (q->in == q->out) empty_error(q);
 
-	assert(NULL != q->cbuf);
 	r = q->cbuf[q->out];
 
 	q->out = (q->out + 1)&CBUFMASK;
@@ -100,8 +91,6 @@ dequeue(struct queue *q)
 void
 queuedestroy(struct queue *q)
 {
-	assert(NULL != q);
-
 	if (NULL != q->cbuf) free(q->cbuf);
 
 	while (NULL != q->ovfhead)

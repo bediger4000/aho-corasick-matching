@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include <ac7.h>
 #include <cb.h>
@@ -12,14 +13,11 @@ init_goto()
 	int i;
 	struct gto *g = NULL;
 
-	g = (struct gto *)malloc(sizeof(*g));
-	assert(NULL != g);
+	g = malloc(sizeof(*g));
 
-	g->ary = (int **)malloc(sizeof(int *));
-	assert(NULL != g->ary);
+	g->ary = malloc(sizeof(int *));
 
-	g->ary[0] = (int *)malloc(128*sizeof(int));
-	assert(NULL != g->ary[0]);
+	g->ary[0] = calloc(128, sizeof(int));
 
 	g->ary_len = 1;
 
@@ -37,8 +35,6 @@ construct_goto(char *keywords[], int k, struct gto *g)
 {
 	int newstate = 0;
 	int i;
-
-	assert(NULL != g);
 
 	for (i = 0; i < k; ++i)
 	{
@@ -230,11 +226,16 @@ perform_match(struct gto *g, char *in)
 	int match = 0;
 	char *s = in;
 
-	assert(NULL != g);
-	assert(NULL != in);
-
 	while(*in != '\0')
-		state = g->delta[state][(int)*in++];
+	{
+		if (isascii(*in))
+		{
+			int nextstate;
+			nextstate = g->delta[state][(int)*in];
+			state = nextstate;
+		}
+		++in;
+	}
 
 	if (g->accept[state].next && ('\0' == *in))
 	{
@@ -278,13 +279,9 @@ construct_delta(struct gto *g)
 	struct queue *q;
 	int i, a;
 
-	g->delta = (int **)malloc(sizeof(int *)*g->ary_len);
-	assert(NULL != g->delta);
+	g->delta = calloc(sizeof(int *), g->ary_len);
 
-	g->delta[0] = (int *)malloc(sizeof(int)*g->ary_len*128);
-	assert(NULL != g->delta[0]);
-
-	bzero(g->delta[0], sizeof(int)*g->ary_len*128);
+	g->delta[0] = calloc(sizeof(int), g->ary_len*128);
 
 	for (i = 0; i < g->ary_len; ++i)
 		g->delta[i] = g->delta[0] + i*128;

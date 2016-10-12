@@ -84,10 +84,6 @@ set_accept(struct gto *p, int state, char *output)
 {
 	struct output *n;
 
-	assert(NULL != p);
-	assert(FAIL != state);
-	assert(0 != state);
-
 	if (state >= p->accept_len)
 	{
 		int i, n = state - p->accept_len + 1;
@@ -108,10 +104,9 @@ set_accept(struct gto *p, int state, char *output)
 	}
 
 	n = (struct output *)malloc(sizeof(*n));
-	assert(NULL != n);
 
 	n->output = malloc(strlen(output)+1);
-	assert(NULL != n->output);
+
 	strcpy(n->output, output);
 
 	n->next = p->accept[state].next;
@@ -265,7 +260,28 @@ destroy_goto(struct gto *p)
 
 	free(p->ary);
 
-	if (NULL != p->accept) free(p->accept);
+	if (NULL != p->accept)
+	{
+		int i;
+		for (i = 0; i < p->accept_len; ++i)
+		{
+			if (p->accept[i].next)
+			{
+				struct output *n, *t;
+				for (n = p->accept[i].next; n != NULL; n = t)
+				{
+					t = n->next;
+					free(n->output);
+					n->output = NULL;
+					free(n);
+					n = NULL;
+				}
+				p->accept[i].next = NULL;
+			}
+		}
+		free(p->accept);
+		p->accept = NULL;
+	}
 	if (NULL != p->failure) free(p->failure);
 	if (NULL != p->delta[0]) free(p->delta[0]);
 	if (NULL != p->delta) free(p->delta);

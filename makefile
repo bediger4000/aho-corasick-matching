@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I. -g -Wall -Wextra
+CFLAGS = -I. -g -Wall -Wextra #-fsanitize=undefined -fsanitize=address
 
 ac: ac_main.o ac7.o cb.o
 	$(CC) $(CFLAGS) -o ac ac_main.o ac7.o cb.o

@@ -31,19 +31,16 @@ init_goto()
 }
 
 void
-construct_goto(char *keywords[], int k, struct gto *g)
+construct_goto(char *keywords[], int keyword_count, struct gto *g)
 {
 	int newstate = 0;
 	int i;
 
-	for (i = 0; i < k; ++i)
+	for (i = 0; i < keyword_count; ++i)
 	{
-		int state, j, p;
+		int state = 0, j = 0, p;
 
 		/* procedure enter() */
-
-		state = 0;
-		j = 0;
 
 		while (
 			FAIL != (
@@ -88,11 +85,12 @@ set_accept(struct gto *p, int state, char *output)
 	{
 		int i, n = state - p->accept_len + 1;
 
+		/* Convoluted because when and where I wrote this, realloc(NULL)
+		 * caused a segfault or something. */
 		p->accept = ((NULL == p->accept) ?
 			malloc(n*sizeof(*p->accept)) :
 			(char *)realloc(p->accept, (p->accept_len+n)*sizeof(*p->accept))
 		);
-		assert(NULL != p->accept);
 
 		i = p->accept_len;
 		p->accept_len += n;
@@ -232,13 +230,14 @@ perform_match(struct gto *g, char *in)
 		++in;
 	}
 
-	if (g->accept[state].next && ('\0' == *in))
+	if (g->accept[state].next)
 	{
 		struct output *t = g->accept[state].next;
 
 		while (!match && NULL != t)
 		{
-			if (!strcmp(t->output, s))
+			/* eliminate this condition to match parts of input strings. */
+			// if (!strcmp(t->output, s))
 				match = 1;
 
 			t = t->next;

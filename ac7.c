@@ -31,6 +31,7 @@ int  dequeue(struct queue *);
 int  queueempty(struct queue *);
 void empty_error(struct queue *);
 
+int add_pattern(char *pattern_string, struct gto *g, int state_counter);
 
 struct gto *
 init_goto()
@@ -55,6 +56,42 @@ init_goto()
 	return g;
 }
 
+int
+add_pattern(char *pattern_string, struct gto *g, int newstate)
+{
+	int state = 0, j = 0, p;
+
+	/* procedure enter() */
+
+	while (
+		FAIL != (
+			(state<g->ary_len) ?
+				g->ary[state][(int)pattern_string[j]] :
+				(assert(state>=g->ary_len),FAIL)
+			)
+		)
+	{
+		state = ((state<g->ary_len) ?
+					g->ary[state][(int)pattern_string[j]] :
+					(assert(state>=g->ary_len),FAIL)
+				);
+		++j;
+	}
+
+	for (p = j; '\0' != pattern_string[p]; ++p)
+	{
+		++newstate;
+		add_state(g, state, pattern_string[p], newstate);
+		state = newstate;
+	}
+
+	/* end procedure enter() */
+
+	set_accept(g, state, pattern_string);
+
+	return newstate;
+}
+
 void
 construct_goto(char *keywords[], int keyword_count, struct gto *g)
 {
@@ -62,38 +99,9 @@ construct_goto(char *keywords[], int keyword_count, struct gto *g)
 	int i;
 
 	for (i = 0; i < keyword_count; ++i)
-	{
-		int state = 0, j = 0, p;
+		newstate = add_pattern(keywords[i], g, newstate);
 
-		/* procedure enter() */
-
-		while (
-			FAIL != (
-				(state<g->ary_len) ?
-					g->ary[state][(int)keywords[i][j]] :
-					(assert(state>=g->ary_len),FAIL)
-				)
-			)
-		{
-			state = ((state<g->ary_len) ?
-						g->ary[state][(int)keywords[i][j]] :
-						(assert(state>=g->ary_len),FAIL)
-					);
-			++j;
-		}
-
-		for (p = j; '\0' != keywords[i][p]; ++p)
-		{
-			++newstate;
-			add_state(g, state, keywords[i][p], newstate);
-			state = newstate;
-		}
-
-		/* end procedure enter() */
-
-		set_accept(g, state, keywords[i]);
-	}
-
+	/* i == keyword_count here. Is this correct? */
 	for (i = 0; i < 128; ++i)
 	{
 		if (FAIL == g->ary[0][i])

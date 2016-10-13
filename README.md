@@ -21,6 +21,21 @@ Library implementsion
     ...
     destroy_goto(g);
 
+#Example Program
+
+Running `make` should yield an executable named `ac`. `ac` accepts keywors to look for
+as individual parameters on the command line, and reads `stdin` and looks for a match
+each input line. Use it like this:
+
+    $ ./ac his hers theirs mine yalls zymurgy < /usr/share/dict/words
+    matched "hers"
+    matched "his"
+    matched "mine"
+    matched "theirs"
+    matched "zymurgy"
+    $
+
+
 #Implementation
 
 I wrote this directly from:

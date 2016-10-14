@@ -101,7 +101,6 @@ construct_goto(char *keywords[], int keyword_count, struct gto *g)
 	for (i = 0; i < keyword_count; ++i)
 		newstate = add_pattern(keywords[i], g, newstate);
 
-	/* i == keyword_count here. Is this correct? */
 	for (i = 0; i < 128; ++i)
 	{
 		if (FAIL == g->ary[0][i])

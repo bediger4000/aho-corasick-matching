@@ -1,6 +1,6 @@
 #Aho Corasick String Matching
 
-A ibrary implementsion of the Aho-Corasick string matching algorithm.
+A library implementation of the Aho-Corasick string matching algorithm.
 
 This should be useful in cases where you'd like to find matches of
 a large number of patterns in your code. `fgrep` would be nice, but

@@ -1,26 +1,20 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-
 #include <ac7.h>
-
-int
-main(int ac, char **av)
+int main(int ac, char **av)
 {
 	struct gto *g;
-	char bp[BUFSIZ];
+	char buf[BUFSIZ];
 
-	if (1 == ac)
-		return 1;
+	if (1 == ac) return 1;
 
 	g = initialize_matching(ac - 1, &av[1]);
 
-	/* do the matching */
-	while (NULL != (fgets(bp, sizeof(bp), stdin)))
+	while (fgets(buf, sizeof(buf), stdin))
 	{
-		bp[strlen(bp) - 1] = '\0';
-		if (perform_match(g, bp))
-			printf("matched \"%s\"\n", bp);
+		buf[strlen(buf) - 1] = '\0';
+		if (perform_match(g, buf))
+			printf("%s\n", buf);
 	}
 
 	destroy_goto(g);

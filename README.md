@@ -1,6 +1,18 @@
 #Aho Corasick String Matching
 
-Library implementsion
+A ibrary implementsion of the Aho-Corasick string matching algorithm.
+
+This should be useful in cases where you'd like to find matches of
+a large number of patterns in your code. `fgrep` would be nice, but
+it's another executable. This code should fit perfectly.
+
+Deliberately made easy to use and modify, at the expense of flexibility
+and speed. It's only about 3 times slower than `fgrep` from the command
+line, and you only have to:
+
+1. Initialize with pattern string(s)
+2. Call a function (repetively) on each line or chunk of input
+3. Destroy the struct from (1).
 
 #Example Use
 
@@ -58,6 +70,12 @@ so you can see what the test cases actually use in the code.
 
 #Implementation
 
+I wrote this mostly before 1995, on a NeXT color slab. I've since incorporated it
+in a few other projects. It forms the basis of the bracket abstraction pattern
+matching in my Generalized Combinatory Logic interpreter. Given the date I wrote it,
+it's pretty strict C89, and it probably doesn't have any endianess problems. It
+certainly doesn't have any 32 vs 64 bit problems.
+
 I wrote this directly from:
 
     String Matching: An Aid to Bibliographic Search 
@@ -65,3 +83,7 @@ I wrote this directly from:
 
 It only matches ASCII keywords. It can handle UTF-8 input as
 the string-to-be-matched (it just skips non-ASCII bytes), but not as the pattern keywords.
+
+I ran it with GNU CC address sanitation and undefined behavior flags, and it passed
+both without a peep. Running it under `valgrind` shows no memory leaks. GNU CC coverage
+testing shows that almost every line except error handling code gets executed.

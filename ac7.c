@@ -31,7 +31,15 @@ int  dequeue(struct queue *);
 int  queueempty(struct queue *);
 void empty_error(struct queue *);
 
-int add_pattern(char *pattern_string, struct gto *g, int state_counter);
+void add_pattern(char *pattern_string, struct gto *g);
+void construct_goto(char *keywords[], int k, struct gto *g);
+void construct_failure(struct gto *g);
+void construct_delta(struct gto *g);
+
+void add_state(struct gto *p, int state, char input, int new_state);
+void set_accept(struct gto *p, int state, char *output);
+struct gto *init_goto(void);
+
 
 struct gto *
 init_goto()
@@ -53,11 +61,26 @@ init_goto()
 	g->accept = NULL;
 	g->accept_len = 0;
 
+	g->state_counter = 0;
+
 	return g;
 }
 
-int
-add_pattern(char *pattern_string, struct gto *g, int newstate)
+struct gto *
+initialize_matching(int keywords_length, char *keywords[])
+{
+	struct gto *g = init_goto();
+
+	construct_goto(keywords, keywords_length, g);
+	construct_failure(g);
+	construct_delta(g);
+
+	return g;
+}
+
+
+void
+add_pattern(char *pattern_string, struct gto *g)
 {
 	int state = 0, j = 0, p;
 
@@ -80,26 +103,23 @@ add_pattern(char *pattern_string, struct gto *g, int newstate)
 
 	for (p = j; '\0' != pattern_string[p]; ++p)
 	{
-		++newstate;
-		add_state(g, state, pattern_string[p], newstate);
-		state = newstate;
+		++g->state_counter;
+		add_state(g, state, pattern_string[p], g->state_counter);
+		state = g->state_counter;
 	}
 
 	/* end procedure enter() */
 
 	set_accept(g, state, pattern_string);
-
-	return newstate;
 }
 
 void
 construct_goto(char *keywords[], int keyword_count, struct gto *g)
 {
-	int newstate = 0;
 	int i;
 
 	for (i = 0; i < keyword_count; ++i)
-		newstate = add_pattern(keywords[i], g, newstate);
+		add_pattern(keywords[i], g);
 
 	for (i = 0; i < 128; ++i)
 	{
@@ -159,15 +179,14 @@ add_state(struct gto *p, int state, char input, int new_state)
 
 		n = 1 + ((new_state > state? new_state: state) - p->ary_len);
 
-		p->ary = (int **)realloc(p->ary, sizeof(int *)*(p->ary_len + n));
+		p->ary = realloc(p->ary, sizeof(int *)*(p->ary_len + n));
 		assert(NULL != p->ary);
 
 		for (i = p->ary_len; i < p->ary_len + n; ++i)
 		{
 			int j;
 
-			p->ary[i] = (int *)malloc(sizeof(int)*128);
-			assert(NULL != p->ary[i]);
+			p->ary[i] = malloc(sizeof(int)*128);
 
 			for (j = 0; j < 128; ++j)
 				p->ary[i][j] = FAIL;
@@ -188,8 +207,7 @@ construct_failure(struct gto *g)
 
 	assert(NULL != g);
 
-	g->failure = (int *)malloc(g->ary_len*sizeof(int));
-	assert(NULL != g->failure);
+	g->failure = malloc(g->ary_len*sizeof(int));
 
 	for (i = 0; i < g->ary_len; ++i)
 		g->failure[i] = 0;
@@ -258,6 +276,7 @@ perform_match(struct gto *g, char *in)
 			int nextstate;
 			nextstate = g->delta[state][(int)*in];
 			state = nextstate;
+			if (g->accept[state].next) break;  /* matched before end of string */
 		}
 		++in;
 	}
@@ -272,6 +291,7 @@ perform_match(struct gto *g, char *in)
 			// if (!strcmp(t->output, s))
 				match = 1;
 
+			// You could put something in here to return which keyword got matched. */
 			t = t->next;
 		}
 	}

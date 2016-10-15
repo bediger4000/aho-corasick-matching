@@ -1,0 +1,41 @@
+#!/bin/bash
+
+
+./ac aard vark /usr/share/dict/words < /usr/share/dict/words > ac.aardvark.out
+fgrep -e aard -e vark /usr/share/dict/words > fgrep.aardvark.out
+
+if diff ac.aardvark.out fgrep.aardvark.out > /dev/null
+then
+	rm -f ac.aardvark.out fgrep.aardvark.out
+else
+	echo "Test 'aard vark' failed"
+fi
+
+./ac his hers theirs mine yalls zymurgy /usr/share/dict/words < /usr/share/dict/words > ac.multiple.out
+fgrep -e his -e hers -e theirs -e mine -e yalls -e zymurgy  /usr/share/dict/words > fgrep.multiple.out
+
+if diff ac.multiple.out fgrep.multiple.out > /dev/null
+then
+	rm -f ac.multiple.out fgrep.multiple.out
+else
+	echo "Test multiple failed"
+fi
+
+./ac "AA" "AAA" "Aachen" "aah" "Aaliyah" "Aaliyah's" "aardvark" "aardvark's" "aardvarks" "Aaron" "AA's" "AB" "ab" "ABA" "aback" "abacus" "abacuses" "abacus's" < /usr/share/dict/words > /dev/null
+
+
+# A lightweight performance test against fgrep.
+# Long patterns and input
+time ./ac abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ '~`!@#$%^&*()_-+={[}]|:;"<,>.?/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' < /usr/share/dict/words
+time fgrep -e abcdefghijklmnopqrstuvwxyz -e ABCDEFGHIJKLMNOPQRSTUVWXYZ -e '~`!@#$%^&*()_-+={[}]|:;"<,>.?/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' < /usr/share/dict/words
+# Long patterns, no input - time difference with the above is just setup time.
+time ./ac abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ '~`!@#$%^&*()_-+={[}]|:;"<,>.?/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' < /dev/null
+time fgrep -e abcdefghijklmnopqrstuvwxyz -e ABCDEFGHIJKLMNOPQRSTUVWXYZ -e '~`!@#$%^&*()_-+={[}]|:;"<,>.?/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' < /dev/null
+
+# Leak checks
+if [[ -x /usr/bin/valgrind ]]
+then
+	valgrind -v --leak-check=full ./ac aard vark /usr/share/dict/words < /usr/share/dict/words > /dev/null
+	valgrind --leak-check=full ./ac abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ '~`!@#$%^&*()_-+={[}]|:;"<,>.?/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' < /usr/share/dict/words
+	valgrind -v --leak-check=full ./ac his hers anarchism flatulence pitiful awkward drover bot carr death egghead theirs mine yalls zymurgy < /usr/share/dict/words > /dev/null
+fi

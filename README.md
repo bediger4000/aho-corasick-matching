@@ -50,6 +50,11 @@ each input line. Use it like this:
     zymurgy's
     $
 
+Invoking `./runtests` should put the example program `ac` through paces compared to `fgrep`.
+
+Invoking `make coverage` builds a code-coverage (gcov) executable, runs some test
+cases with it, and then invokes `lcov` and `genhtml` to give you the directory `covered/`
+so you can see what the test cases actually use in the code.
 
 #Implementation
 
@@ -59,4 +64,4 @@ I wrote this directly from:
     Alfred V Aho and Magaret J Corasick
 
 It only matches ASCII keywords. It can handle UTF-8 input as
-the string-to-be-matched, but not as the pattern keywords.
+the string-to-be-matched (it just skips non-ASCII bytes), but not as the pattern keywords.

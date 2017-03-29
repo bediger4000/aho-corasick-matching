@@ -1,4 +1,4 @@
-#Aho Corasick String Matching
+# Aho Corasick String Matching
 
 A library implementation of the Aho-Corasick string matching algorithm.
 
@@ -14,7 +14,7 @@ line, and you only have to:
 2. Call a function (repetively) on each line or chunk of input
 3. Destroy the struct from (1).
 
-#Example Use
+# Example Use
 
 	#include <stdio.h>
 	#include <string.h>
@@ -41,7 +41,7 @@ line, and you only have to:
 	}
 
 
-#Example Program
+# Example Program
 
 Running `make` should yield an executable named `ac`. `ac` accepts keywors to look for
 as individual parameters on the command line, and reads `stdin` and looks for a match
@@ -68,7 +68,7 @@ Invoking `make coverage` builds a code-coverage (gcov) executable, runs some tes
 cases with it, and then invokes `lcov` and `genhtml` to give you the directory `covered/`
 so you can see what the test cases actually use in the code.
 
-#Implementation
+# Implementation
 
 I wrote this mostly before 1995, on a NeXT color slab. I've since incorporated it
 in a few other projects. It forms the basis of the bracket abstraction pattern
